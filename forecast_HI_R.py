@@ -89,6 +89,9 @@ for idx in range(41):
     # Plot this timestep (simplified example)
     plt.figure(figsize=(6, 4))
     ax = plt.axes(projection=ccrs.PlateCarree())
+    # Mask values <0.1 mm to avoid log(0)
+    field = np.where(field < 0.1, np.nan, field)
+    
     im = ax.contourf(longitude, latitude, masked_field, levels=bounds,transform=ccrs.PlateCarree(),cmap=cmap, norm=LogNorm(vmin=0.1, vmax=50),
                      levels=np.logspace(np.log10(0.1), np.log10(50), num=10), extend='max')
     ax.coastlines()
