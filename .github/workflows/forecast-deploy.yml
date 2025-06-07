@@ -1,0 +1,42 @@
+name: Generate Forecast and Deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '10 3 * * *'  # Runs every day at midnight UTC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirement.txt
+
+      - name: Run forecast script
+        run: |
+          python HI.py  # This should include both HI and rainfall generation
+
+      - name: Commit and push updated images
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          git add image/*.png
+          git add image_rain/*.png
+          git add index.html heat_index.html rain.html
+
+          git diff --cached --quiet || git commit -m "Update forecast images and pages"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
