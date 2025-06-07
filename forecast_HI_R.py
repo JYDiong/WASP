@@ -90,7 +90,7 @@ for idx in range(41):
     plt.figure(figsize=(6, 4))
     ax = plt.axes(projection=ccrs.PlateCarree())
     im = ax.contourf(longitude, latitude, masked_field, levels=bounds,transform=ccrs.PlateCarree(),cmap=cmap, norm=LogNorm(vmin=0.1, vmax=50),
-                     levels=np.logspace(np.log10(0.1), np.log10(50), num=10, extend='max')
+                     levels=np.logspace(np.log10(0.1), np.log10(50), num=10), extend='max')
     ax.coastlines()
     ax.set_title(f"Forecast heat index, init: {str(adate)}, \n valid: {str(formatted_time)}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
