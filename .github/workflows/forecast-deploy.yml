@@ -25,7 +25,7 @@ jobs:
 
       - name: Run forecast script
         run: |
-          python HI.py  # This should include both HI and rainfall generation
+          python forecast_HI_R.py  # This should include both HI and rainfall generation
 
       - name: Commit and push updated images
         run: |
