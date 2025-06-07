@@ -9,6 +9,7 @@ from datetime import timedelta
 import warnings
 warnings.filterwarnings('ignore')
 os.makedirs('./image_rain', exist_ok=True)
+os.makedirs('./image', exist_ok=True)
 
 ct=datetime.datetime.now().date()
 
