@@ -5,6 +5,8 @@ import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib.colors import LinearSegmentedColormap, BoundaryNorm
+import numpy as np
 import datetime
 from datetime import timedelta
 import warnings
