@@ -128,10 +128,13 @@ blue = cm.get_cmap('Blues')  # Accessing rainbow colormap from cm
 white_to_blue = LinearSegmentedColormap.from_list("white_to_blue", ["white", "blue"], N=256)
 
 # create a custom boundary for levels
-level = np.logspace(np.log10(0.1), np.log10(50), num=10)
+level = np.logspace(np.log10(0.1), np.log10(50), num=60)
 
 # Creat boundaries such as anything below 1 will be mapped to white
 boundaries = np.concatenate([[-np.inf], level[1:], [np.inf]])
+
+# Create custom ticks
+custom_ticks=[5, 10, 15, 20, 30, 40, 50]
 
 norm=BoundaryNorm(boundaries, ncolors=256)
 
@@ -147,6 +150,7 @@ for idx in range(41):
     ax.set_title(f"3-hourly Accumulated Rainfall (mm), init: {adate}, \n valid: {formatted_time}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
     cbar.set_label("3-hourly Accumulated Rainfall (mm)", fontsize='8')
+    cbar.set_ticks(custom_ticks)
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
