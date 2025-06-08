@@ -89,11 +89,8 @@ for idx in range(41):
     # Plot this timestep (simplified example)
     plt.figure(figsize=(6, 4))
     ax = plt.axes(projection=ccrs.PlateCarree())
-    # Mask values <0.1 mm to avoid log(0)
-    field = np.where(field < 0.1, np.nan, field)
     
-    im = ax.contourf(longitude, latitude, masked_field, levels=bounds,transform=ccrs.PlateCarree(),cmap=cmap, norm=LogNorm(vmin=0.1, vmax=50),
-                     levels=np.logspace(np.log10(0.1), np.log10(50), num=10), extend='max')
+    im = ax.contourf(longitude, latitude, masked_field, levels=bounds,transform=ccrs.PlateCarree(),cmap=cmap, norm=norm, extend='max')
     ax.coastlines()
     ax.set_title(f"Forecast heat index, init: {str(adate)}, \n valid: {str(formatted_time)}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
@@ -119,6 +116,22 @@ rain_time = ds_Malaysian['time'][1:]  # Matches dimensions after diff
 # Compute to load into memory
 rain_3hr_computed = rain_3hr.compute()
 
+# Mask values <0.1 mm to avoid log(0)
+field = np.where(field < 0.1, np.nan, field)
+
+# Define a custom colormap that transitions from white to rainbow
+blue = cm.get_cmap('Blues')  # Accessing rainbow colormap from cm
+# Create the colormap from white to blue
+white_to_blue = LinearSegmentedColormap.from_list("white_to_blue", ["white", "blue"], N=256)
+
+# create a custom boundary for levels
+level = np.logspace(np.log10(0.1), np.log10(50), num=10)
+
+# Creat boundaries such as anything below 1 will be mapped to white
+boundaries = np.concatenate([[-np.inf], level[1:], [np.inf]])
+
+norm=BoundaryNorm(boundaries, ncolors=256)
+
 for idx in range(41):
     field = rain_3hr_computed[idx]
     forecast_time = timestep[idx]
@@ -126,7 +139,7 @@ for idx in range(41):
 
     plt.figure(figsize=(6, 4))
     ax = plt.axes(projection=ccrs.PlateCarree())
-    im = ax.contourf(longitude, latitude, field, transform=ccrs.PlateCarree(), cmap='Blues', levels=np.arange(0, 50, 5),extend='max')
+    im = ax.contourf(longitude, latitude, field, transform=ccrs.PlateCarree(), cmap='Blues', levels=level, norm=norm,extend='max')
     ax.coastlines()
     ax.set_title(f"3-hourly Accumulated Rainfall (mm), init: {adate}, \n valid: {formatted_time}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
