@@ -139,7 +139,9 @@ custom_ticks=[5, 10, 15, 20, 30, 40, 50]
 norm=BoundaryNorm(boundaries, ncolors=256)
 
 for idx in range(41):
-    field = rain_3hr_computed[idx]
+    raw_field = rain_3hr_computed[idx]
+    # Mask values <0.1 mm to avoid log(0)
+    field = np.where(raw_field < 0.1, np.nan, raw_field)
     forecast_time = timestep[idx]
     formatted_time = pd.to_datetime(forecast_time.values).strftime('%Y-%m-%d %H:%M')
 
