@@ -5,3 +5,4 @@ matplotlib
 cartopy
 numpy
 netcdf4
+typing_extensions
