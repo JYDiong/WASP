@@ -128,13 +128,13 @@ blue = cm.get_cmap('Blues')  # Accessing rainbow colormap from cm
 white_to_blue = LinearSegmentedColormap.from_list("white_to_blue", ["white", "blue"], N=256)
 
 # create a custom boundary for levels
-level = [0,2,4,6,8,10,15,20,25,30]
+level = [0,3,6,9,12,15,20,25,30]
 
 # Creat boundaries such as anything below 1 will be mapped to white
 boundaries = np.concatenate([[-np.inf], level[1:], [np.inf]])
 
 # Create custom ticks
-custom_ticks=[3, 5, 10, 15, 20, 30, 40, 50]
+custom_ticks=[0, 3, 6, 9, 12, 15, 20, 25, 30]
 
 norm=BoundaryNorm(boundaries, ncolors=256)
 
