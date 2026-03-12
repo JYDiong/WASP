@@ -163,7 +163,7 @@ for idx in range(41):
 
 ### accumulated rainfall
 
-rain = ds['apcp']  # kg m-2 == mm
+rain = ds['tp']  # kg m-2 == mm
 
 # Compute 3-hourly rainfall (difference between time steps)
 rain_3hr = rain.diff(dim='time')  # Now has one less time step
@@ -211,6 +211,7 @@ for idx in range(41):
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
+
 
 
 
