@@ -14,28 +14,63 @@ warnings.filterwarnings('ignore')
 os.makedirs('./image_rain', exist_ok=True)
 os.makedirs('./image', exist_ok=True)
 
-ct=datetime.datetime.now().date()
+# --------------------------------------------------
+# Initialization Time (Yesterday 00 UTC)
+# --------------------------------------------------
+init_date = datetime.utcnow().replace(
+    hour=0, minute=0, second=0, microsecond=0
+) - timedelta(days=1)
 
-def subtract_days_from_date(date,days):
-    subtracted_date=pd.to_datetime(date)-timedelta(days=days)
-    subtracted_date=subtracted_date.strftime("%d-%m-%Y")
+# --------------------------------------------------
+# FULL GFS Forecast Hours (0–384)
+# 0–120 hourly
+# 126–384 every 3 hours
+# --------------------------------------------------
+forecast_hours = list(range(0, 121)) + list(range(126, 385, 3))
 
-    return subtracted_date
+datasets = []
 
-adate=subtract_days_from_date(ct,1)
+print("Downloading GFS full forecast...")
 
-from datetime import datetime
-adate1=datetime.strptime(adate, "%d-%m-%Y")
-yyyy = adate1.strftime("%Y")
-mm = adate1.strftime("%m")
-dd = adate1.strftime("%d")
+for fxx in forecast_hours:
+    print(f"Downloading F{fxx:03d}")
 
-url=f'https://nomads.ncep.noaa.gov/dods/gfs_0p25/gfs{yyyy}{mm}{dd}/gfs_0p25_00z'
+    H = Herbie(
+        date=init_date,
+        model="gfs",
+        product="pgrb2.0p25",
+        fxx=fxx,
+    )
 
-ds = xr.open_dataset(url, engine='netcdf4')
+    ds = H.xarray(
+        ":(TMP:2 m above ground|DPT:2 m above ground|APCP:surface):"
+    )
 
-ds_Malaysian=ds.sel(lon=slice(100,120),lat=slice(0,12))
+    if isinstance(ds, list):
+        ds = xr.merge(ds)
 
+    valid_time = init_date + timedelta(hours=fxx)
+    ds = ds.expand_dims(time=[valid_time])  # ensures each forecast hour has its own time
+
+    datasets.append(ds)
+
+# --------------------------------------------------
+# Combine all timesteps
+# --------------------------------------------------
+ds = xr.concat(datasets, dim="time")
+ds = ds.sortby("time")  # ensures time is ascending
+
+print("Total timesteps:", len(ds.time))
+
+# --------------------------------------------------
+# Subset Malaysia
+# --------------------------------------------------
+ds = ds.sel(
+    longitude=slice(100, 120),
+    latitude=slice(12, 0)
+)
+
+#-----------------------------------------------------
 def temp2F(ds):
     celcius = ds - 273.15
     fahrenheit = (celcius*(9/5))+32
@@ -156,3 +191,4 @@ for idx in range(41):
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
+
