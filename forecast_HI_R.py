@@ -70,30 +70,49 @@ ds = ds.sel(
     latitude=slice(12, 0)
 )
 
-#-----------------------------------------------------
-def temp2F(ds):
-    celcius = ds - 273.15
-    fahrenheit = (celcius*(9/5))+32
-    return fahrenheit
+# --------------------------------------------------
+# Temperature Conversion
+# --------------------------------------------------
+def kelvin_to_fahrenheit(da):
+    return (da - 273.15) * 9/5 + 32
 
-def calculate_heat_index(temperature_f, relative_humidity_percent):
-    """
-    Calculates the Heat Index using the NWS simplified regression equation.
-    """
-    rh = relative_humidity_percent
-    hi = (-42.379 + 2.04901523 * temperature_f + 10.14333127 * rh -
-          0.22475541 * temperature_f * rh - 6.83783e-3 * temperature_f**2 -
-          5.481717e-2 * rh**2 + 1.22874e-3 * temperature_f**2 * rh +
-          8.5282e-4 * temperature_f * rh**2 - 1.99e-6 * temperature_f**2 * rh**2)
-    return hi
+tmp_f = kelvin_to_fahrenheit(ds["t2m"])
 
-tmp_2m_f=temp2F(ds_Malaysian['tmp2m'])
+# --------------------------------------------------
+# Relative Humidity Calculation
+# --------------------------------------------------
+T = ds["t2m"] - 273.15
+Td = ds["d2m"] - 273.15
 
-rh_2m=ds_Malaysian['rh2m']
+es = 6.112 * np.exp((17.67 * T) / (T + 243.5))
+e  = 6.112 * np.exp((17.67 * Td) / (Td + 243.5))
 
-HI=calculate_heat_index(tmp_2m_f,rh_2m)
+rh = 100 * (e / es)
 
-HI_computed=HI.compute()
+# --------------------------------------------------
+# Heat Index Calculation
+# --------------------------------------------------
+def calculate_heat_index(T_f, RH):
+
+    HI_simple = 0.5 * (
+        T_f + 61.0 + ((T_f - 68.0) * 1.2) + (RH * 0.094)
+    )
+
+    HI_full = (
+        -42.379
+        + 2.04901523 * T_f
+        + 10.14333127 * RH
+        - 0.22475541 * T_f * RH
+        - 6.83783e-3 * T_f**2
+        - 5.481717e-2 * RH**2
+        + 1.22874e-3 * T_f**2 * RH
+        + 8.5282e-4 * T_f * RH**2
+        - 1.99e-6 * T_f**2 * RH**2
+    )
+
+    return xr.where(T_f <= 80, HI_simple, HI_full)
+
+HI = calculate_heat_index(tmp_f, rh).compute()
 
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
@@ -143,7 +162,7 @@ for idx in range(41):
 
 ### accumulated rainfall
 
-rain = ds_Malaysian['apcpsfc']  # kg m-2 == mm
+rain = ds_Malaysian['tp']  # kg m-2 == mm
 
 # Compute 3-hourly rainfall (difference between time steps)
 rain_3hr = rain.diff(dim='time')  # Now has one less time step
@@ -191,4 +210,5 @@ for idx in range(41):
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
+
 
