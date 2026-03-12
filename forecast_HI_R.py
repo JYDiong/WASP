@@ -8,6 +8,7 @@ import matplotlib.cm as cm
 from matplotlib.colors import LinearSegmentedColormap, BoundaryNorm
 import numpy as np
 import datetime
+from herbie import Herbie
 from datetime import timedelta
 import warnings
 warnings.filterwarnings('ignore')
@@ -210,6 +211,7 @@ for idx in range(41):
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
+
 
 
 
