@@ -17,7 +17,7 @@ os.makedirs('./image', exist_ok=True)
 # --------------------------------------------------
 # Initialization Time (Yesterday 00 UTC)
 # --------------------------------------------------
-init_date = datetime.utcnow().replace(
+init_date = datetime.datetime.utcnow().replace(
     hour=0, minute=0, second=0, microsecond=0
 ) - timedelta(days=1)
 
@@ -131,10 +131,10 @@ norm = mcolors.BoundaryNorm(bounds, cmap.N)
 
 ### limit up to 5 days forecast, 40 timesteps
 
-longitude=HI_computed.lon
-latitude=HI_computed.lat
-data=HI_computed.values
-timestep=HI_computed.time
+longitude = HI.longitude
+latitude = HI.latitude
+data = HI.values
+timestep = HI.time
 
 for idx in range(41):
     field = data[idx]
@@ -149,7 +149,7 @@ for idx in range(41):
     
     im = ax.contourf(longitude, latitude, masked_field, levels=bounds,transform=ccrs.PlateCarree(),cmap=cmap, norm=norm, extend='max')
     ax.coastlines()
-    ax.set_title(f"Forecast heat index, init: {str(adate)}, \n valid: {str(formatted_time)}", fontsize=10)
+    ax.set_title(f"Forecast heat index, init: {str(init_date)}, \n valid: {str(formatted_time)}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
     cbar.set_label("HI Risk Level",fontsize='8')
     #cbar.set_ticks([85, 96.5,113.5])  # approximate midpoints of the ranges
@@ -162,19 +162,19 @@ for idx in range(41):
 
 ### accumulated rainfall
 
-rain = ds_Malaysian['tp']  # kg m-2 == mm
+rain = ds['apcp']  # kg m-2 == mm
 
 # Compute 3-hourly rainfall (difference between time steps)
 rain_3hr = rain.diff(dim='time')  # Now has one less time step
 
 # Adjust time (optional, for plotting)
-rain_time = ds_Malaysian['time'][1:]  # Matches dimensions after diff
+rain_time = ds['time'][1:]  # Matches dimensions after diff
 
 # Compute to load into memory
 rain_3hr_computed = rain_3hr.compute()
 
 # Mask values <0.1 mm to avoid log(0)
-field = np.where(field < 0.1, np.nan, field)
+#field = np.where(field < 0.1, np.nan, field)
 
 # Define a custom colormap that transitions from white to rainbow
 blue = cm.get_cmap('Blues')  # Accessing rainbow colormap from cm
@@ -196,19 +196,20 @@ for idx in range(41):
     raw_field = rain_3hr_computed[idx]
     # Mask values <0.1 mm to avoid log(0)
     field = np.where(raw_field < 0.1, np.nan, raw_field)
-    forecast_time = timestep[idx]
+    forecast_time = rain_time[idx]
     formatted_time = pd.to_datetime(forecast_time.values).strftime('%Y-%m-%d %H:%M')
 
     plt.figure(figsize=(6, 4))
     ax = plt.axes(projection=ccrs.PlateCarree())
     im = ax.contourf(longitude, latitude, field, transform=ccrs.PlateCarree(), cmap='Blues', levels=level, norm=norm,extend='max')
     ax.coastlines()
-    ax.set_title(f"3-hourly Accumulated Rainfall (mm), init: {adate}, \n valid: {formatted_time}", fontsize=10)
+    ax.set_title(f"3-hourly Accumulated Rainfall (mm), init: {init_date}, \n valid: {formatted_time}", fontsize=10)
     cbar = plt.colorbar(im, orientation='horizontal', pad=0.02, aspect=30, shrink=0.8, ax=ax, location='bottom')
     cbar.set_label("3-hourly Accumulated Rainfall (mm)", fontsize='8')
     cbar.set_ticks(custom_ticks)
     cbar.ax.tick_params(labelsize=6)
     plt.savefig(f'./image_rain/Rainfall_map_{idx}.png', dpi=300)
     plt.close()
+
 
 
