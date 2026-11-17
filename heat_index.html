@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Heat Index Forecast – WASP</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+    h1 {
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+    h2 {
+      margin-top: 0;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 20px;
+      font-size: 1rem;
+    }
+    input[type=range] {
+      width: 80%;
+      margin-top: 10px;
+    }
+    img {
+      margin-top: 20px;
+      max-width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 30px;
+      text-decoration: none;
+      color: #fff;
+      background-color: #1976d2;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    a.button:hover {
+      background-color: #1565c0;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: #777;
+    }
+    footer a {
+      color: #555;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>WASP</h1>
+  <h2>Heat Index Forecast Viewer (GFS 3-Hourly)</h2>
+  <p style="max-width:700px; margin: 0 auto 20px; font-size: 1.05rem; color: #444;">
+  The <strong>Heat Index</strong> combines air temperature and relative humidity to estimate how hot it feels to the human body. This page shows the <strong>3-hourly GFS forecast</strong> of the Heat Index over Malaysia for the next 5 days. 
+  <br><br>
+  Values are color-coded into risk levels:
+  <ul style="text-align:left; max-width:600px; margin: 0 auto; font-size: 0.95rem; color: #555;">
+    <li><strong>80–90°F:</strong> Caution — Fatigue possible with prolonged exposure.</li>
+    <li><strong>90–103°F:</strong> Extreme Caution — Heat cramps and exhaustion likely.</li>
+    <li><strong>103–124°F:</strong> Danger — Heatstroke possible with continued activity.</li>
+    <li><strong>≥125°F:</strong> Extreme Danger — Heatstroke imminent.</li>
+  </ul>
+  Use the slider to explore changes over time and monitor upcoming risk periods.
+</p>
+
+  <label for="slider">Forecast Hour: <span id="hour-label">0</span> hr</label>
+  <input type="range" id="slider" min="0" max="40" value="0" />
+
+  <img id="forecast-image" src="./image/Heat_index_F000.png" alt="Heat Index Forecast" />
+
+  <br />
+  <a class="button" href="index.html">← Back to Landing Page</a>
+
+  <footer>
+    <p>&copy; 2025 <a href="https://github.com/JYDiong">J.Y. Diong</a>. Forecasts from <a href="https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast">NOAA GFS</a>.</p>
+  </footer>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const image = document.getElementById('forecast-image');
+    const hourLabel = document.getElementById('hour-label');
+
+    slider.addEventListener('input', () => {
+      const fxx = slider.value * 3;
+      const paddedFxx = String(fxx).padStart(3, '0');
+      image.src = `./image/Heat_index_F${paddedFxx}.png`;
+      hourLabel.textContent = fxx;
+    });
+  </script>
+
+</body>
+</html>
