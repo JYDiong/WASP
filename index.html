@@ -2,71 +2,282 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>WASP Forecast Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WASP &mdash; Weather: Always Sweaty or Pouring</title>
   <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #26354d;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-heat: #f97316;
+      --accent-rain: #38bdf8;
+      --accent-surge: #818cf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f4f6f9;
-      color: #333;
       margin: 0;
-      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 65%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
+
+    header {
+      padding: 40px 20px 28px;
+      text-align: center;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
-    h2 {
-      color: #666;
-      margin-bottom: 30px;
+
+    .badge-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
     }
-    .link-box {
-      margin: 20px auto;
-      width: 250px;
-      padding: 20px;
-      border-radius: 10px;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      font-size: 1.1rem;
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
     }
-    a {
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      letter-spacing: 6px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #fb923c, #f8fafc 48%, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header .subtitle {
+      margin: 8px 0 0;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+      flex: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
       text-decoration: none;
-      color: #1e88e5;
-      font-weight: bold;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
+    .card:hover {
+      transform: translateY(-5px);
+      background: var(--surface-hover);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .card.heat:hover { border-color: var(--accent-heat); }
+    .card.rain:hover { border-color: var(--accent-rain); }
+    .card.surge:hover { border-color: var(--accent-surge); }
+
+    .thumb-box {
+      position: relative;
+      width: 100%;
+      height: 190px;
+      background: #0f172a;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.92;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .card:hover .thumb-box img {
+      transform: scale(1.04);
+      opacity: 1;
+    }
+
+    .tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .card.heat .tag { color: var(--accent-heat); }
+    .card.rain .tag { color: var(--accent-rain); }
+    .card.surge .tag { color: var(--accent-surge); }
+
+    .card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-body h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .card-body p {
+      margin: 0 0 18px;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .cta {
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card.heat .cta { color: var(--accent-heat); }
+    .card.rain .cta { color: var(--accent-rain); }
+    .card.surge .cta { color: var(--accent-surge); }
+
     footer {
-      margin-top: 40px;
-      font-size: 0.9rem;
-      color: #888;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
     }
   </style>
 </head>
 <body>
+  <header>
+    <div class="badge-row">
+      <span class="live-dot"></span>
+      <span>&bull;</span>
+      <span id="mytClock">--:-- MYT</span>
+    </div>
+    <h1>WASP</h1>
+    <p class="subtitle">Weather: Always Sweaty or Pouring </p>
+  </header>
 
-  <h1>WASP</h1>
-  <h2>Weather: Always Sweaty or Pouring</h2>
-  <p style="max-width:600px; margin: 0 auto 30px; font-size: 1.1rem; color: #444;">
-  Welcome to WASP where we monitor if the Weather is always sweaty or pouring.  
-  This site provides near-realtime forecasts from the GFS and GEFS models. The forecasts include heat index (based on NOAA's definition), 
-  3 hourly rainfall maps and cold surge probabilities for the Malaysia region.  
-  Use the sliders on each forecast page to explore the forecast at different hours. Stay informed and prepared! 
-</p>
+  <main>
+    <div class="grid">
+      <!-- Heat Index Card -->
+      <a href="heat_index.html" class="card heat">
+        <div class="thumb-box">
+          <span class="tag">NOAA GFS 0.25&deg;</span>
+          <img src="image/HI_01.png" alt="Heat Index Forecast Preview" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <h2>Heat Index &amp; Thermal Stress</h2>
+          <p>
+            Hot or not hot.
+          </p>
+          <span class="cta">Explore Heat Index Maps &rarr;</span>
+        </div>
+      </a>
 
-  <div class="link-box">
-    🔥 <a href="heat_index.html">Heat Index Forecast</a>
-  </div>
+      <!-- Rainfall Card -->
+      <a href="rain.html" class="card rain">
+        <div class="thumb-box">
+          <span class="tag">NOAA GFS 0.25&deg;</span>
+          <img src="image_rain/Rain_01.png" alt="Rainfall Forecast Preview" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <h2>Accumulated Rainfall</h2>
+          <p>
+            Deterministic precipitation forecasts.
+          </p>
+          <span class="cta">Explore Rainfall Maps &rarr;</span>
+        </div>
+      </a>
 
-  <div class="link-box">
-    🌧️ <a href="rain.html">Rainfall Forecast</a>
-  </div>
-
-  <div class="link-box">
-    🌬️ <a href="cold_surge.html">Cold Surge &amp; Daily Rain (GEFS)</a>
-  </div>
+      <!-- Cold Surge & Ensemble Probability Card -->
+      <a href="cold_surge.html" class="card surge">
+        <div class="thumb-box">
+          <span class="tag">31-Member GEFS Ensemble</span>
+          <img
+            src="image_gefs_daily/Daily_Wind925_RainProb_ge20mm_Day01.png"
+            alt="Cold Surge and Daily Rainfall Probability Preview"
+            onerror="this.style.display='none'"
+          />
+        </div>
+        <div class="card-body">
+          <h2>Cold Surge &amp; Rain Probability</h2>
+          <p>
+            10-day ensemble exceedance probabilities (&ge;20, &ge;59, &ge;80 mm/day) paired with 925 hPa
+            wind vectors and South China Sea surge index.
+          </p>
+          <span class="cta">Explore 10-Day Ensemble &rarr;</span>
+        </div>
+      </a>
+    </div>
+  </main>
 
   <footer>
-    <p>© 2025 J.Y. Diong • Built using GFS and GEFS data and GitHub Actions</p>
+    &copy; 2025 J.Y. Diong &bull; Built using GFS and GEFS data and GitHub Actions
   </footer>
 
+  <script>
+    function updateMYTClock() {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kuala_Lumpur",
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      document.getElementById("mytClock").textContent = formatter.format(now) + " MYT";
+    }
+    updateMYTClock();
+    setInterval(updateMYTClock, 30000);
+  </script>
 </body>
 </html>
