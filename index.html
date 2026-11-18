@@ -32,22 +32,51 @@
     }
 
     header {
-      padding: 40px 20px 28px;
+      padding: 36px 20px 26px;
       text-align: center;
       border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
 
     .badge-row {
       display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
       gap: 10px;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.82);
       border: 1px solid var(--border);
-      padding: 6px 14px;
+      padding: 8px 18px;
       border-radius: 999px;
       font-size: 0.8rem;
       color: var(--text-muted);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
+      max-width: 100%;
+    }
+
+    .astro-bar {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      background: rgba(30, 41, 59, 0.65);
+      border: 1px solid rgba(51, 65, 85, 0.85);
+      padding: 7px 18px;
+      border-radius: 12px;
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .astro-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .astro-item strong {
+      color: var(--text-main);
+      font-weight: 600;
     }
 
     .live-dot {
@@ -197,11 +226,32 @@
   <header>
     <div class="badge-row">
       <span class="live-dot"></span>
+      <span>Kuala Lumpur</span>
       <span>&bull;</span>
       <span id="mytClock">--:-- MYT</span>
+      <span>&bull;</span>
+      <span>True Solar Time: <strong id="solarTime" style="color: var(--text-main);">--:--:--</strong></span>
+      <span>&bull;</span>
+      <span id="moonBadge" style="display: inline-flex; align-items: center; gap: 6px;" title="Moon Phase">
+        <svg id="moonSvg" width="16" height="16" viewBox="0 0 100 100" role="img" aria-label="Moon Phase Symbol"></svg>
+        <span>Moon Phase: <strong id="moonText" style="color: var(--text-main);">--</strong></span>
+      </span>
     </div>
+
+    <br />
+
+    <div class="astro-bar">
+      <span class="astro-item">Sunrise: <strong id="sunriseTime">--:--</strong></span>
+      <span>&bull;</span>
+      <span class="astro-item">Sunset: <strong id="sunsetTime">--:--</strong></span>
+      <span>&bull;</span>
+      <span class="astro-item">Moonrise: <strong id="moonriseTime">--:--</strong></span>
+      <span>&bull;</span>
+      <span class="astro-item">Moonset: <strong id="moonsetTime">--:--</strong></span>
+    </div>
+
     <h1>WASP</h1>
-    <p class="subtitle">Weather: Always Sweaty or Pouring </p>
+    <p class="subtitle">Weather: Always Sweaty or Pouring</p>
   </header>
 
   <main>
@@ -210,7 +260,7 @@
       <a href="heat_index.html" class="card heat">
         <div class="thumb-box">
           <span class="tag">NOAA GFS 0.25&deg;</span>
-          <img src="image/Heat_index_F000.png" alt="Heat Index Forecast Preview" onerror="this.style.display='none'" />
+          <img src="image/HI_01.png" alt="Heat Index Forecast Preview" onerror="this.style.display='none'" />
         </div>
         <div class="card-body">
           <h2>Heat Index &amp; Thermal Stress</h2>
@@ -225,7 +275,7 @@
       <a href="rain.html" class="card rain">
         <div class="thumb-box">
           <span class="tag">NOAA GFS 0.25&deg;</span>
-          <img src="image_rain/Rainfall_F003.png" alt="Rainfall Forecast Preview" onerror="this.style.display='none'" />
+          <img src="image_rain/Rain_01.png" alt="Rainfall Forecast Preview" onerror="this.style.display='none'" />
         </div>
         <div class="card-body">
           <h2>Accumulated Rainfall</h2>
@@ -263,7 +313,63 @@
   </footer>
 
   <script>
-    function updateMYTClock() {
+    // Kuala Lumpur coordinates & timezone
+    const KL_LAT = 3.1390;
+    const KL_LON = 101.6869;
+    const KL_TZ_OFFSET = 8; // UTC+8
+
+    const RAD = Math.PI / 180;
+    const DEG = 180 / Math.PI;
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function formatMinutesToHHMM(totalMinutes) {
+      if (totalMinutes === null || isNaN(totalMinutes)) return "--:--";
+      let m = Math.round(totalMinutes) % 1440;
+      if (m < 0) m += 1440;
+      const hh = Math.floor(m / 60);
+      const mm = m % 60;
+      return `${pad2(hh)}:${pad2(mm)}`;
+    }
+
+    // Equation of Time (minutes) & Solar Declination (radians)
+    function solarGeometry(doy) {
+      const gamma = ((2 * Math.PI) / 365) * (doy - 1);
+      const eqTime =
+        229.18 *
+        (0.000075 +
+          0.001868 * Math.cos(gamma) -
+          0.032077 * Math.sin(gamma) -
+          0.014615 * Math.cos(2 * gamma) -
+          0.040849 * Math.sin(2 * gamma));
+
+      const decl =
+        0.006918 -
+        0.399912 * Math.cos(gamma) +
+        0.070257 * Math.sin(gamma) -
+        0.006758 * Math.cos(2 * gamma) +
+        0.000907 * Math.sin(2 * gamma) -
+        0.002697 * Math.cos(3 * gamma) +
+        0.00148 * Math.sin(3 * gamma);
+
+      return { eqTime, decl };
+    }
+
+    function getKLDateParts(now = new Date()) {
+      const klMs = now.getTime() + KL_TZ_OFFSET * 3600 * 1000;
+      const klDate = new Date(klMs);
+      const year = klDate.getUTCFullYear();
+      const month = klDate.getUTCMonth();
+      const day = klDate.getUTCDate();
+      const startOfYear = Date.UTC(year, 0, 0);
+      const doy = Math.floor((Date.UTC(year, month, day) - startOfYear) / 86400000);
+      return { klDate, year, month, day, doy };
+    }
+
+    // Live MYT Clock + True Solar Time for Kuala Lumpur
+    function updateClocks() {
       const now = new Date();
       const formatter = new Intl.DateTimeFormat("en-GB", {
         timeZone: "Asia/Kuala_Lumpur",
@@ -275,9 +381,159 @@
         hour12: false
       });
       document.getElementById("mytClock").textContent = formatter.format(now) + " MYT";
+
+      const { klDate, doy } = getKLDateParts(now);
+      const { eqTime } = solarGeometry(doy);
+
+      // Standard meridian for UTC+8 is 120°E; KL is 101.6869°E (-73.25 min offset)
+      const timeOffsetMin = eqTime + 4 * (KL_LON - 15 * KL_TZ_OFFSET);
+      const localSeconds =
+        klDate.getUTCHours() * 3600 +
+        klDate.getUTCMinutes() * 60 +
+        klDate.getUTCSeconds();
+
+      let trueSolarSec = (localSeconds + timeOffsetMin * 60) % 86400;
+      if (trueSolarSec < 0) trueSolarSec += 86400;
+
+      const sH = Math.floor(trueSolarSec / 3600);
+      const sM = Math.floor((trueSolarSec % 3600) / 60);
+      const sS = Math.floor(trueSolarSec % 60);
+      document.getElementById("solarTime").textContent = `${pad2(sH)}:${pad2(sM)}:${pad2(sS)}`;
     }
-    updateMYTClock();
-    setInterval(updateMYTClock, 30000);
+
+    // Sunrise & Sunset for Kuala Lumpur (NOAA solar zenith 90.833°)
+    function updateSunTimes() {
+      const { doy } = getKLDateParts();
+      const { eqTime, decl } = solarGeometry(doy);
+
+      const cosHA =
+        Math.cos(90.833 * RAD) / (Math.cos(KL_LAT * RAD) * Math.cos(decl)) -
+        Math.tan(KL_LAT * RAD) * Math.tan(decl);
+
+      if (cosHA < -1 || cosHA > 1) {
+        document.getElementById("sunriseTime").textContent = "--:--";
+        document.getElementById("sunsetTime").textContent = "--:--";
+        return;
+      }
+
+      const haDeg = Math.acos(cosHA) * DEG;
+      const sunriseMin = 720 - 4 * (KL_LON + haDeg) - eqTime + KL_TZ_OFFSET * 60;
+      const sunsetMin = 720 - 4 * (KL_LON - haDeg) - eqTime + KL_TZ_OFFSET * 60;
+
+      document.getElementById("sunriseTime").textContent = formatMinutesToHHMM(sunriseMin);
+      document.getElementById("sunsetTime").textContent = formatMinutesToHHMM(sunsetMin);
+    }
+
+    // Low-precision lunar altitude (degrees) at Unix timestamp ms
+    function getMoonAltitude(ms, lat, lon) {
+      const d = ms / 86400000 - 10957.5; // days since J2000.0
+      const L = (218.316 + 13.176396 * d) * RAD; // mean longitude
+      const M = (134.963 + 13.064993 * d) * RAD; // mean anomaly
+      const F = (93.272 + 13.229350 * d) * RAD;  // argument of latitude
+
+      const lonEcl = L + 6.289 * RAD * Math.sin(M);
+      const latEcl = 5.128 * RAD * Math.sin(F);
+      const eps = 23.4397 * RAD;
+
+      const ra = Math.atan2(
+        Math.sin(lonEcl) * Math.cos(eps) - Math.tan(latEcl) * Math.sin(eps),
+        Math.cos(lonEcl)
+      );
+      const dec = Math.asin(
+        Math.sin(latEcl) * Math.cos(eps) +
+          Math.cos(latEcl) * Math.sin(eps) * Math.sin(lonEcl)
+      );
+
+      // Greenwich Mean Sidereal Time
+      const gmst = (280.46061837 + 360.98564736629 * d) * RAD;
+      const lmst = gmst + lon * RAD;
+      const ha = lmst - ra;
+
+      const sinAlt =
+        Math.sin(lat * RAD) * Math.sin(dec) +
+        Math.cos(lat * RAD) * Math.cos(dec) * Math.cos(ha);
+
+      return Math.asin(sinAlt) * DEG;
+    }
+
+    // Moonrise & Moonset for Kuala Lumpur (horizon target +0.125° accounting for parallax & refraction)
+    function updateMoonTimes() {
+      const { year, month, day } = getKLDateParts();
+      // Midnight KL time in UTC ms
+      const startUtcMs = Date.UTC(year, month, day, 0, 0, 0) - KL_TZ_OFFSET * 3600 * 1000;
+      const targetAlt = 0.125;
+
+      let riseStr = "--:--";
+      let setStr = "--:--";
+
+      let prevAlt = getMoonAltitude(startUtcMs, KL_LAT, KL_LON) - targetAlt;
+
+      // Scan the 24-hour KL day in 5-minute steps with linear interpolation
+      for (let min = 5; min <= 1440; min += 5) {
+        const currAlt = getMoonAltitude(startUtcMs + min * 60000, KL_LAT, KL_LON) - targetAlt;
+        if (prevAlt < 0 && currAlt >= 0 && riseStr === "--:--") {
+          const frac = -prevAlt / (currAlt - prevAlt);
+          riseStr = formatMinutesToHHMM(min - 5 + frac * 5);
+        } else if (prevAlt >= 0 && currAlt < 0 && setStr === "--:--") {
+          const frac = prevAlt / (prevAlt - currAlt);
+          setStr = formatMinutesToHHMM(min - 5 + frac * 5);
+        }
+        prevAlt = currAlt;
+      }
+
+      document.getElementById("moonriseTime").textContent = riseStr;
+      document.getElementById("moonsetTime").textContent = setStr;
+    }
+
+    // Moon Phase SVG Symbol + Label
+    function renderMoonPhase(date = new Date()) {
+      const LUNAR_CYCLE = 29.53058867;
+      const KNOWN_NEW_MOON = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+
+      const daysSinceNew = (date - KNOWN_NEW_MOON) / 86400000;
+      const currentAge = ((daysSinceNew % LUNAR_CYCLE) + LUNAR_CYCLE) % LUNAR_CYCLE;
+      const phaseRatio = currentAge / LUNAR_CYCLE;
+
+      const illumination = Math.round(((1 - Math.cos(phaseRatio * 2 * Math.PI)) / 2) * 100);
+
+      const phases = [
+        "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
+        "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"
+      ];
+      const phaseIndex = Math.floor(phaseRatio * 8 + 0.5) % 8;
+      const phaseName = phases[phaseIndex];
+
+      const svg = document.getElementById("moonSvg");
+      const r = 45, cx = 50, cy = 50;
+      const isWaxing = phaseRatio <= 0.5;
+      const rx = Math.abs(Math.cos(phaseRatio * 2 * Math.PI)) * r;
+      const sweepFlag = phaseRatio > 0.25 && phaseRatio < 0.75 ? 1 : 0;
+
+      let pathData = "";
+      if (phaseIndex === 0) {
+        pathData = "";
+      } else if (phaseIndex === 4) {
+        pathData = `M ${cx},${cy - r} A ${r},${r} 0 1,1 ${cx},${cy + r} A ${r},${r} 0 1,1 ${cx},${cy - r}`;
+      } else if (isWaxing) {
+        pathData = `M ${cx},${cy - r} A ${r},${r} 0 0,1 ${cx},${cy + r} A ${rx},${r} 0 0,${sweepFlag} ${cx},${cy - r}`;
+      } else {
+        pathData = `M ${cx},${cy - r} A ${r},${r} 0 0,0 ${cx},${cy + r} A ${rx},${r} 0 0,${1 - sweepFlag} ${cx},${cy - r}`;
+      }
+
+      svg.innerHTML = `
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1e293b" stroke="#64748b" stroke-width="4"/>
+        ${pathData ? `<path d="${pathData}" fill="#fef08a"/>` : ""}
+      `;
+
+      document.getElementById("moonText").textContent = `${phaseName} (${illumination}%)`;
+    }
+
+    updateClocks();
+    updateSunTimes();
+    updateMoonTimes();
+    renderMoonPhase();
+
+    setInterval(updateClocks, 1000);
   </script>
 </body>
 </html>
