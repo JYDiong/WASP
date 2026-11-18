@@ -2,296 +2,277 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WASP &mdash; Tag &amp; Track (3-Hourly Squall Trajectories)</title>
+  <title>Tag &amp; Track Forecast – WASP</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface-hover: #26354d;
-      --border: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-track: #10b981;
-      --accent-track-soft: rgba(16, 185, 129, 0.14);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 65%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      padding: 32px 20px 24px;
       text-align: center;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-    }
-
-    .nav-top {
-      max-width: 1120px;
-      margin: 0 auto 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid var(--border);
-      transition: color 0.2s ease, border-color 0.2s ease;
-    }
-
-    .back-link:hover {
-      color: var(--text-main);
-      border-color: var(--accent-track);
-    }
-
-    .product-pill {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--accent-track);
-      background: var(--accent-track-soft);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      padding: 5px 12px;
-      border-radius: 999px;
-    }
-
-    .badge-row {
-      display: inline-flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      background: rgba(15, 23, 42, 0.82);
-      border: 1px solid var(--border);
-      padding: 8px 18px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      max-width: 100%;
-    }
-
-    .astro-bar {
-      display: inline-flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      background: rgba(30, 41, 59, 0.65);
-      border: 1px solid rgba(51, 65, 85, 0.85);
-      padding: 7px 18px;
-      border-radius: 12px;
-      font-size: 0.79rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-    }
-
-    .astro-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .astro-item strong {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 8px #22c55e;
-    }
-
-    header h1 {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
       margin: 0;
-      font-size: clamp(1.9rem, 4vw, 2.7rem);
-      letter-spacing: 4px;
-      font-weight: 800;
-      background: linear-gradient(90deg, #34d399, #f8fafc 50%, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    header .quote {
-      margin: 10px auto 0;
-      max-width: 620px;
-      font-size: 0.86rem;
-      font-style: italic;
-      color: #cbd5e1;
-      opacity: 0.85;
-    }
-
-    header .quote span {
-      font-style: normal;
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-
-    main {
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 28px 20px 48px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
       padding: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      color: #222;
     }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 18px;
-    }
-
-    .btn-group {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    button {
-      background: #0f172a;
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    button:hover {
-      border-color: var(--accent-track);
-      background: var(--surface-hover);
-    }
-
-    button.active {
-      background: var(--accent-track);
-      color: #06281e;
-      border-color: var(--accent-track);
-    }
-
-    .slider-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      min-width: 240px;
-    }
-
-    input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent-track);
-      cursor: pointer;
-    }
-
-    .step-badge {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.85rem;
+    h1 {
+      margin-bottom: 5px;
       font-weight: 700;
-      color: var(--accent-track);
-      background: #0f172a;
-      border: 1px solid var(--border);
-      padding: 5px 10px;
-      border-radius: 6px;
-      min-width: 112px;
-      text-align: center;
     }
-
-    .map-frame {
-      position: relative;
-      width: 100%;
-      background: #0b1120;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 360px;
+    h2 {
+      margin-top: 0;
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 20px;
     }
-
-    .map-frame img {
-      width: 100%;
-      max-height: 760px;
-      object-fit: contain;
+    .btn-row {
+      margin-top: 15px;
+    }
+    button {
+      font-family: Arial, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      margin: 0 4px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #222;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e4e6eb;
+    }
+    button.active {
+      background-color: #1976d2;
+      color: #fff;
+      border-color: #1976d2;
+    }
+    label {
+      font-weight: 600;
       display: block;
+      margin-top: 20px;
+      font-size: 1rem;
     }
-
-    .fallback-msg {
+    input[type=range] {
+      width: 80%;
+      margin-top: 10px;
+    }
+    img {
+      margin-top: 20px;
+      max-width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #fallback-msg {
       display: none;
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.92rem;
+      margin: 25px auto;
+      padding: 20px;
+      max-width: 600px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      color: #555;
     }
-
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .table-header h2 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .table-wrap {
+    #table-section {
+      display: none;
+      max-width: 90%;
+      margin: 30px auto 0;
       overflow-x: auto;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      background: #fff;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    th, td {
+      padding: 10px 12px;
+      border: 1px solid #ddd;
       text-align: left;
     }
-
     th {
-      color: var(--text-muted);
-      font-weight: 600;
-      padding: 10px 1
+      background-color: #1976d2;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 30px;
+      text-decoration: none;
+      color: #fff;
+      background-color: #1976d2;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    a.button:hover {
+      background-color: #1565c0;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: #777;
+    }
+    footer a {
+      color: #555;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>WASP</h1>
+  <h2>Tag &amp; Track Viewer (GFS 3-Hourly)</h2>
+  <p style="max-width:700px; margin: 0 auto 20px; font-size: 1.05rem; color: #444;">
+    <strong>Tag &amp; Track</strong> automatically identifies convective precipitation cells and tracks squall trajectories using the <strong>3-hourly GFS 0.25&deg; forecast</strong> over Malaysia and the surrounding seas.
+  </p>
+
+  <ul style="text-align:left; max-width:600px; margin: 0 auto 20px; font-size: 0.95rem; color: #555;">
+    <li><strong>Trajectory Summary:</strong> Full forecast overview of tracked squall families and genesis points.</li>
+    <li><strong>3-Hourly Frames (+3h to +240h):</strong> Step-by-step rain rate fields overlaid with tagged squall polygons and centroid tracks.</li>
+  </ul>
+
+  <div class="btn-row">
+    <button id="btn-summary" class="active" onclick="showSummary()">Trajectory Summary</button>
+    <button id="btn-prev" onclick="stepSlider(-1)">&larr; Prev 3h</button>
+    <button id="btn-play" onclick="togglePlay()">&#9654; Play</button>
+    <button id="btn-next" onclick="stepSlider(1)">Next 3h &rarr;</button>
+  </div>
+
+  <label for="slider">Forecast Hour: <span id="hour-label">Summary</span></label>
+  <input type="range" id="slider" min="1" max="80" value="1" />
+
+  <div>
+    <img id="forecast-image" src="./image_track/Track_Summary.png" alt="Tag and Track Forecast" onerror="showFallback()" />
+    <div id="fallback-msg">No map image available for this forecast step yet.</div>
+  </div>
+
+  <div id="table-section">
+    <h3>Tracked Squall Families (tracks.csv)</h3>
+    <table>
+      <thead id="csv-head"></thead>
+      <tbody id="csv-body"></tbody>
+    </table>
+  </div>
+
+  <br />
+  <a class="button" href="index.html">&larr; Back to Landing Page</a>
+
+  <footer>
+    <p>&copy; 2025 <a href="https://github.com/JYDiong">J.Y. Diong</a>. Forecasts from <a href="https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast">NOAA GFS</a>.</p>
+  </footer>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const image = document.getElementById('forecast-image');
+    const fallback = document.getElementById('fallback-msg');
+    const hourLabel = document.getElementById('hour-label');
+    const btnSummary = document.getElementById('btn-summary');
+    const btnPlay = document.getElementById('btn-play');
+
+    let isSummary = true;
+    let playTimer = null;
+
+    function loadImg(path) {
+      fallback.style.display = 'none';
+      image.style.display = 'inline-block';
+      image.src = path;
+    }
+
+    function showFallback() {
+      image.style.display = 'none';
+      fallback.style.display = 'block';
+      stopPlay();
+    }
+
+    function showSummary() {
+      stopPlay();
+      isSummary = true;
+      btnSummary.classList.add('active');
+      hourLabel.textContent = 'Summary';
+      loadImg('./image_track/Track_Summary.png');
+    }
+
+    function updateStep() {
+      isSummary = false;
+      btnSummary.classList.remove('active');
+      const fxx = slider.value * 3;
+      const paddedFxx = String(fxx).padStart(3, '0');
+      loadImg(`./image_track/Track_${paddedFxx}.png`);
+      hourLabel.textContent = `${fxx} hr`;
+    }
+
+    function stepSlider(delta) {
+      stopPlay();
+      if (isSummary) {
+        slider.value = 1;
+        updateStep();
+        return;
+      }
+      let next = parseInt(slider.value, 10) + delta;
+      if (next > 80) next = 1;
+      if (next < 1) next = 80;
+      slider.value = next;
+      updateStep();
+    }
+
+    function togglePlay() {
+      if (playTimer) {
+        stopPlay();
+      } else {
+        if (isSummary) {
+          slider.value = 1;
+          updateStep();
+        }
+        btnPlay.textContent = '⏸ Pause';
+        btnPlay.classList.add('active');
+        playTimer = setInterval(() => {
+          let next = parseInt(slider.value, 10) + 1;
+          if (next > 80) next = 1;
+          slider.value = next;
+          updateStep();
+        }, 500);
+      }
+    }
+
+    function stopPlay() {
+      if (playTimer) {
+        clearInterval(playTimer);
+        playTimer = null;
+      }
+      btnPlay.innerHTML = '&#9654; Play';
+      btnPlay.classList.remove('active');
+    }
+
+    slider.addEventListener('input', () => {
+      stopPlay();
+      updateStep();
+    });
+
+    async function loadTrackCSV() {
+      try {
+        const res = await fetch('./image_track/tracks.csv', { cache: 'no-store' });
+        if (!res.ok) return;
+        const text = await res.text();
+        const lines = text.trim().split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) return;
+
+        const headers = lines[0].split(',');
+        document.getElementById('csv-head').innerHTML =
+          `<tr>${headers.map(h => `<th>${h.trim()}</th>`).join('')}</tr>`;
+        document.getElementById('csv-body').innerHTML =
+          lines.slice(1, 101).map(row =>
+            `<tr>${row.split(',').map(c => `<td>${c.trim()}</td>`).join('')}</tr>`
+          ).join('');
+        document.getElementById('table-section').style.display = 'block';
+      } catch (e) {}
+    }
+    loadTrackCSV();
+  </script>
+
+</body>
+</html>
