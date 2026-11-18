@@ -15,6 +15,7 @@
       --accent-heat: #f97316;
       --accent-rain: #38bdf8;
       --accent-surge: #818cf8;
+      --accent-track: #10b981;
     }
 
     * {
@@ -129,7 +130,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
       gap: 24px;
     }
 
@@ -154,6 +155,7 @@
     .card.heat:hover { border-color: var(--accent-heat); }
     .card.rain:hover { border-color: var(--accent-rain); }
     .card.surge:hover { border-color: var(--accent-surge); }
+    .card.track:hover { border-color: var(--accent-track); }
 
     .thumb-box {
       position: relative;
@@ -194,6 +196,7 @@
     .card.heat .tag { color: var(--accent-heat); }
     .card.rain .tag { color: var(--accent-rain); }
     .card.surge .tag { color: var(--accent-surge); }
+    .card.track .tag { color: var(--accent-track); }
 
     .card-body {
       padding: 20px;
@@ -319,6 +322,19 @@
             wind vectors and cold surge index.
           </p>
           <span class="cta">Explore 10-Day Ensemble &rarr;</span>
+        </div>
+        <!-- Tag & Track Card (ADDED) -->
+      <a href="tag_track.html" class="card track">
+        <div class="thumb-box">
+          <span class="tag">sqtrack &bull; 3-Hourly GFS</span>
+          <img src="image_track/Track_Summary.png" alt="Tag and Track Squall Trajectories Preview" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <h2>Tag &amp; Track</h2>
+          <p>
+            Automated object tagging and trajectory tracking of convective rain cells and squalls across Malaysia.
+          </p>
+          <span class="cta">Explore Storm Tracks &rarr;</span>
         </div>
       </a>
     </div>
