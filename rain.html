@@ -32,19 +32,6 @@
       width: 80%;
       margin-top: 10px;
     }
-    .key-hint {
-      margin-top: 6px;
-      font-size: 0.85rem;
-      color: #666;
-    }
-    kbd {
-      background-color: #e4e6eb;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-family: monospace;
-      font-size: 0.85em;
-    }
     img {
       margin-top: 20px;
       max-width: 90%;
@@ -85,14 +72,13 @@
   <p style="max-width:700px; margin: 0 auto 20px; font-size: 1.05rem; color: #444;">
   This page presents the <strong>3-hourly accumulated rainfall forecast</strong> from the Global Forecast System (GFS) over Malaysia for the next 5 days.
   <br><br>
-  Rainfall is shown in millimeters (mm), with values indicating the total precipitation expected within each 3-hour period. Use the slider or <kbd>←</kbd> / <kbd>→</kbd> arrow keys to explore how rainfall evolves over time and identify potential periods of heavy precipitation.
+  Rainfall is shown in millimeters (mm), with values indicating the total precipitation expected within each 3-hour period. Use the slider to explore how rainfall evolves over time and identify potential periods of heavy precipitation.
   <br><br>
   These forecasts are helpful for anticipating localized flooding, storm development, and general wet weather impacts.
   </p>
 
   <label for="slider">Forecast Hour: <span id="hour-label">3</span> hr</label>
   <input type="range" id="slider" min="1" max="40" value="1" />
-  <div class="key-hint">Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to step 3 hours</div>
   
   <img id="forecast-image" src="./image_rain/Rainfall_F003.png" alt="Rainfall Forecast" />
 
@@ -108,35 +94,11 @@
     const image = document.getElementById('forecast-image');
     const hourLabel = document.getElementById('hour-label');
 
-    function updateForecast() {
-      const fxx = Number(slider.value) * 3;
+    slider.addEventListener('input', () => {
+      const fxx = slider.value * 3;
       const paddedFxx = String(fxx).padStart(3, '0');
       image.src = `./image_rain/Rainfall_F${paddedFxx}.png`;
       hourLabel.textContent = fxx;
-    }
-
-    slider.addEventListener('input', updateForecast);
-
-    document.addEventListener('keydown', (e) => {
-      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName) && document.activeElement !== slider) {
-        return;
-      }
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const current = Number(slider.value);
-        if (current > Number(slider.min)) {
-          slider.value = current - 1;
-          updateForecast();
-        }
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        const current = Number(slider.value);
-        if (current < Number(slider.max)) {
-          slider.value = current + 1;
-          updateForecast();
-        }
-      }
     });
   </script>
 
