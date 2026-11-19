@@ -32,6 +32,19 @@
       width: 80%;
       margin-top: 10px;
     }
+    .key-hint {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    kbd {
+      background-color: #e4e6eb;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
     img {
       margin-top: 20px;
       max-width: 90%;
@@ -79,11 +92,12 @@
     <li><strong>103–124°F:</strong> Danger — Heatstroke possible with continued activity.</li>
     <li><strong>≥125°F:</strong> Extreme Danger — Heatstroke imminent.</li>
   </ul>
-  Use the slider to explore changes over time and monitor upcoming risk periods.
+  Use the slider or <kbd>←</kbd> / <kbd>→</kbd> arrow keys to explore changes over time and monitor upcoming risk periods.
 </p>
 
   <label for="slider">Forecast Hour: <span id="hour-label">0</span> hr</label>
   <input type="range" id="slider" min="0" max="40" value="0" />
+  <div class="key-hint">Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to step 3 hours</div>
 
   <img id="forecast-image" src="./image/Heat_index_F000.png" alt="Heat Index Forecast" />
 
@@ -99,13 +113,6 @@
     const image = document.getElementById('forecast-image');
     const hourLabel = document.getElementById('hour-label');
 
-    slider.addEventListener('input', () => {
-      const fxx = slider.value * 3;
+    function updateForecast() {
+      const fxx = Number(slider.value) * 3;
       const paddedFxx = String(fxx).padStart(3, '0');
-      image.src = `./image/Heat_index_F${paddedFxx}.png`;
-      hourLabel.textContent = fxx;
-    });
-  </script>
-
-</body>
-</html>
