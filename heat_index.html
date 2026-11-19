@@ -98,4 +98,53 @@
 
   <label for="slider">Forecast Hour: <span id="hour-label">0</span> hr</label>
   <input type="range" id="slider" min="0" max="40" value="0" />
-  <div class="key-hint
+  <div class="key-hint">Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to step 3 hours</div>
+
+  <img id="forecast-image" src="./image/Heat_index_F000.png" alt="Heat Index Forecast" />
+
+  <br />
+  <a class="button" href="index.html">← Back to Landing Page</a>
+
+  <footer>
+    <p>&copy; 2025 <a href="https://github.com/JYDiong">J.Y. Diong</a>. Forecasts from <a href="https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast">NOAA GFS</a>.</p>
+  </footer>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const image = document.getElementById('forecast-image');
+    const hourLabel = document.getElementById('hour-label');
+
+    function updateForecast() {
+      const fxx = Number(slider.value) * 3;
+      const paddedFxx = String(fxx).padStart(3, '0');
+      image.src = `./image/Heat_index_F${paddedFxx}.png`;
+      hourLabel.textContent = fxx;
+    }
+
+    slider.addEventListener('input', updateForecast);
+
+    document.addEventListener('keydown', (e) => {
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName) && document.activeElement !== slider) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const current = Number(slider.value);
+        if (current > Number(slider.min)) {
+          slider.value = current - 1;
+          updateForecast();
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const current = Number(slider.value);
+        if (current < Number(slider.max)) {
+          slider.value = current + 1;
+          updateForecast();
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
