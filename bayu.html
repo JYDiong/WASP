@@ -84,7 +84,7 @@
 <body>
 
   <header>
-    <h1>WASP — Wind Streamlines Forecast (GFS)</h1>
+    <h1>WASP — Bayu (GFS Wind Streamlines)</h1>
     <div class="controls">
       <div class="control-row">
         <div>
@@ -117,8 +117,8 @@
   <script>
     const map = L.map("map").setView([4.2, 108.5], 6);
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: "&copy; OpenStreetMap &copy; CARTO | GFS Wind",
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Tiles &copy; Esri | GFS Wind",
       maxZoom: 12
     }).addTo(map);
 
