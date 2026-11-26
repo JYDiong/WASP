@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bayu – WASP</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-velocity@2.1.4/dist/leaflet-velocity.min.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      text-align: center;
+    }
+    header {
+      padding: 14px 20px 8px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+    }
+    .controls {
+      margin: 8px auto 12px;
+      max-width: 820px;
+      padding: 0 15px;
+    }
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    select {
+      background-color: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 5px;
+      padding: 6px 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    input[type=range] {
+      width: 75%;
+      max-width: 620px;
+    }
+    .key-hint {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+    kbd {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: monospace;
+    }
+    #map {
+      height: 70vh;
+      width: 94%;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+    a.button {
+      display: inline-block;
+      margin: 18px 0 24px;
+      text-decoration: none;
+      color: #fff;
+      background-color: #0284c7;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    a.button:hover {
+      background-color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>WASP — Wind Streamlines Forecast (GFS)</h1>
+    <div class="controls">
+      <div class="control-row">
+        <div>
+          <label for="level-select"><strong>Pressure Level:</strong></label>
+          <select id="level-select">
+            <option value="925" selected>925 hPa</option>
+            <option value="850">850 hPa</option>
+            <option value="500">500 hPa</option>
+            <option value="200">200 hPa</option>
+          </select>
+        </div>
+        <div>
+          <label for="slider"><strong>Forecast Hour: <span id="hour-label">0</span> hr</strong></label>
+        </div>
+      </div>
+
+      <input type="range" id="slider" min="0" max="40" value="0" />
+      <div class="key-hint">
+        Tip: Use <kbd>←</kbd> and <kbd>→</kbd> arrow keys to step 3 hours &bull; Hover map for speed &amp; direction
+      </div>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <a class="button" href="index.html">← Back to Landing Page</a>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-velocity@2.1.4/dist/leaflet-velocity.min.js"></script>
+  <script>
+    const map = L.map("map").setView([4.2, 108.5], 6);
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: "&copy; OpenStreetMap &copy; CARTO | GFS Wind",
+      maxZoom: 12
+    }).addTo(map);
+
+    let velocityLayer = null;
+    const slider = document.getElementById("slider");
+    const levelSelect = document.getElementById("level-select");
+    const hourLabel = document.getElementById("hour-label");
+
+    // Scale color/speed range by pressure altitude (m/s)
+    const LEVEL_MAX_VEL = {
+      "925": 20,
+      "850": 22,
+      "500": 25,
+      "200": 35
+    };
+
+    async function loadWind() {
+      const fxx = Number(slider.value) * 3;
+      const level = levelSelect.value;
+      const paddedFxx = String(fxx).padStart(3, "0");
+      hourLabel.textContent = fxx;
+
+      try {
+        const res = await fetch(`./wind_data/wind_${level}_F${paddedFxx}.json`);
+        const data = await res.json();
+
+        if (velocityLayer) {
+          map.removeLayer(velocityLayer);
+        }
+
+        velocityLayer = L.velocityLayer({
+          displayValues: true,
+          displayOptions: {
+            velocityType: `GFS ${level} hPa Wind`,
+            position: "bottomleft",
+            emptyString: "No wind data",
+            angleConvention: "meteo",
+            speedUnit: "kt"
+          },
+          data: data,
+          maxVelocity: LEVEL_MAX_VEL[level] || 22,
+          velocityScale: 0.008,
+          particleAge: 60,
+          lineWidth: 2
+        }).addTo(map);
+      } catch (err) {
+        console.error("Failed to load wind JSON:", err);
+      }
+    }
+
+    slider.addEventListener("input", loadWind);
+    levelSelect.addEventListener("change", () => {
+      levelSelect.blur(); // Return focus so Left/Right arrow keys immediately step forecast hours
+      loadWind();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName) && document.activeElement !== slider) {
+        return;
+      }
+      if (e.key === "ArrowLeft" && Number(slider.value) > Number(slider.min)) {
+        e.preventDefault();
+        slider.value = Number(slider.value) - 1;
+        loadWind();
+      } else if (e.key === "ArrowRight" && Number(slider.value) < Number(slider.max)) {
+        e.preventDefault();
+        slider.value = Number(slider.value) + 1;
+        loadWind();
+      }
+    });
+
+    loadWind();
+  </script>
+</body>
+</html>
