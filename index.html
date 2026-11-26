@@ -16,9 +16,10 @@
       --accent-rain: #38bdf8;
       --accent-surge: #818cf8;
       --accent-track: #10b981;
+      --accent-bayu: #2dd4bf;
     }
 
-    * {
+    - {
       box-sizing: border-box;
     }
 
@@ -156,6 +157,7 @@
     .card.rain:hover { border-color: var(--accent-rain); }
     .card.surge:hover { border-color: var(--accent-surge); }
     .card.track:hover { border-color: var(--accent-track); }
+    .card.bayu:hover { border-color: var(--accent-wind); }
 
     .thumb-box {
       position: relative;
@@ -197,6 +199,7 @@
     .card.rain .tag { color: var(--accent-rain); }
     .card.surge .tag { color: var(--accent-surge); }
     .card.track .tag { color: var(--accent-track); }
+    .card.bayu .tag { color: var(--accent-wind); }
 
     .card-body {
       padding: 20px;
@@ -230,6 +233,8 @@
     .card.heat .cta { color: var(--accent-heat); }
     .card.rain .cta { color: var(--accent-rain); }
     .card.surge .cta { color: var(--accent-surge); }
+    .card.track .cta { color: var(--accent-track); }
+    .card.bayu .cta { color: var(--accent-wind); }
 
     footer {
       text-align: center;
@@ -323,7 +328,8 @@
           </p>
           <span class="cta">Explore 10-Day Ensemble &rarr;</span>
         </div>
-        
+      </a>
+      
         <!-- Tag & Track Card -->
       <a href="tag_track.html" class="card track">
         <div class="thumb-box">
@@ -336,6 +342,21 @@
             Automated object tagging and trajectory tracking of convective rain cells and squalls across Malaysia and Southeast Asia.
           </p>
           <span class="cta">Explore Storm Tracks &rarr;</span>
+        </div>
+      </a>
+
+         <!-- Bayu (Wind Streamlines) Card <-- NEW -->
+      <a href="bayu.html" class="card wind">
+        <div class="thumb-box">
+          <span class="tag">GFS 925&ndash;200 hPa</span>
+          <img src="wind_data/Bayu_Preview.png" alt="Bayu Preview" onerror="this.style.display='none'" />
+        </div>
+        <div class="card-body">
+          <h2>Bayu &mdash; Wind Streamlines</h2>
+          <p>
+            Interactive animated wind streamlines across 925, 850, 500, and 200 hPa levels as a fun hobby.
+          </p>
+          <span class="cta">Explore Wind Streamlines &rarr;</span>
         </div>
       </a>
     </div>
