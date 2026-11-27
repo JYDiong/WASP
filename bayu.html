@@ -43,6 +43,11 @@
       font-weight: 600;
       cursor: pointer;
     }
+    .valid-time {
+      color: #38bdf8;
+      font-weight: 600;
+      margin-left: 6px;
+    }
     input[type=range] {
       width: 75%;
       max-width: 620px;
@@ -97,7 +102,10 @@
           </select>
         </div>
         <div>
-          <label for="slider"><strong>Forecast Hour: <span id="hour-label">0</span> hr</strong></label>
+          <label for="slider">
+            <strong>Forecast Hour: <span id="hour-label">0</span> hr</strong>
+            <span id="valid-time" class="valid-time"></span>
+          </label>
         </div>
       </div>
 
@@ -126,6 +134,7 @@
     const slider = document.getElementById("slider");
     const levelSelect = document.getElementById("level-select");
     const hourLabel = document.getElementById("hour-label");
+    const validTimeLabel = document.getElementById("valid-time");
 
     // Scale color/speed range by pressure altitude (m/s)
     const LEVEL_MAX_VEL = {
@@ -134,6 +143,17 @@
       "500": 25,
       "200": 35
     };
+
+    const mytFormatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kuala_Lumpur",
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
 
     async function loadWind() {
       const fxx = Number(slider.value) * 3;
@@ -144,6 +164,18 @@
       try {
         const res = await fetch(`./wind_data/wind_${level}_F${paddedFxx}.json`);
         const data = await res.json();
+
+        // Parse refTime (UTC) from JSON header and display valid MYT timestamp
+        const refTime = data[0]?.header?.refTime;
+        if (refTime) {
+          const isoUtc = refTime.includes("T") ? refTime : refTime.replace(" ", "T") + "Z";
+          const initUtc = new Date(isoUtc);
+          if (!isNaN(initUtc.getTime())) {
+            const validDate = new Date(initUtc.getTime() + fxx * 3600 * 1000);
+            const cycleStr = String(initUtc.getUTCHours()).padStart(2, "0") + "Z";
+            validTimeLabel.textContent = `(${mytFormatter.format(validDate)} MYT | Run: ${cycleStr})`;
+          }
+        }
 
         if (velocityLayer) {
           map.removeLayer(velocityLayer);
